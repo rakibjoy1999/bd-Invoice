@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BD Medical Research and Consultancy - Money Receipt</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body{
+  font-family: "Times New Roman", serif;
+  background:#f2f2f2;
+  padding:20px;
+}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  background:white;
+  padding:20px;
+  border:2px solid #000;
+}
+
+h1{
+  text-align:center;
+  font-size:28px;
+}
+
+.header{
+  text-align:center;
+  margin-bottom:10px;
+}
+
+input{
+  width:100%;
+  padding:8px;
+  margin:5px 0;
+  border:1px solid #000;
+}
+
+button{
+  padding:10px;
+  margin-top:10px;
+  background:black;
+  color:white;
+  border:none;
+  cursor:pointer;
+}
+
+.receipt{
+  margin-top:20px;
+  padding:20px;
+  border:1px solid #000;
+  background:#fff;
+}
+
+.small{
+  font-size:14px;
+}
+
+.center{
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="header">
+  <h1>BD Medical Research and Consultancy</h1>
+  <p class="small">Money Receipt System</p>
+</div>
+
+<!-- INPUT FORM -->
+<input id="receiptNo" placeholder="Receipt No (e.g. 001)">
+<input id="name" placeholder="Receiver Name">
+<input id="amount" placeholder="Amount (TK)">
+<input id="amountText" placeholder="Amount in Words">
+<input id="purpose" placeholder="Purpose">
+<input id="date" type="date">
+
+<button onclick="generateReceipt()">Generate Receipt</button>
+<button onclick="downloadPDF()">Download PDF</button>
+
+<!-- RECEIPT -->
+<div class="receipt" id="receipt">
+
+  <h2 class="center">MONEY RECEIPT</h2>
+
+  <p><b>Receipt No:</b> <span id="rNo"></span></p>
+  <p><b>Date:</b> <span id="rDate"></span></p>
+
+  <hr>
+
+  <p><b>Received From:</b> <span id="rName"></span></p>
+  <p><b>Amount:</b> <span id="rAmount"></span> TK</p>
+  <p><b>In Words:</b> <span id="rWords"></span></p>
+  <p><b>Purpose:</b> <span id="rPurpose"></span></p>
+
+  <br><br>
+
+  <p class="center"><b>BD Medical Research and Consultancy</b></p>
+</div>
+
+</div>
+
+<script>
+
+function generateReceipt(){
+  document.getElementById("rNo").innerText = document.getElementById("receiptNo").value;
+  document.getElementById("rName").innerText = document.getElementById("name").value;
+  document.getElementById("rAmount").innerText = document.getElementById("amount").value;
+  document.getElementById("rWords").innerText = document.getElementById("amountText").value;
+  document.getElementById("rPurpose").innerText = document.getElementById("purpose").value;
+  document.getElementById("rDate").innerText = document.getElementById("date").value;
+}
+
+function downloadPDF(){
+
+  const receipt = document.getElementById("receipt");
+
+  html2canvas(receipt, {scale:2}).then(canvas => {
+
+    const imgData = canvas.toDataURL("image/png");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF("p","mm","a4");
+
+    const imgWidth = 190;
+    const pageHeight = 295;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
+    pdf.save("BD_Medical_Receipt.pdf");
+
+  });
+
+}
+
+</script>
+
+</body>
+</html>
