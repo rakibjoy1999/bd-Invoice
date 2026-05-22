@@ -9,21 +9,65 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-body{font-family:Times New Roman;background:#f2f2f2;padding:20px;}
-.container{max-width:900px;margin:auto;background:#fff;padding:20px;border:2px solid #000;}
-.header{display:flex;gap:10px;align-items:center;border-bottom:2px solid #000;padding-bottom:10px;}
-.header img{width:80px;height:80px;object-fit:cover;}
+body{
+font-family:Times New Roman;
+background:#f2f2f2;
+padding:20px;
+}
 
-input,button{padding:8px;margin:5px 0;width:100%;}
-button{background:#000;color:#fff;border:none;cursor:pointer;}
+.container{
+max-width:900px;
+margin:auto;
+background:#fff;
+padding:20px;
+border:2px solid #000;
+}
+
+.header{
+display:flex;
+gap:10px;
+align-items:center;
+border-bottom:2px solid #000;
+padding-bottom:10px;
+}
+
+.header img{
+width:80px;
+height:80px;
+object-fit:cover;
+}
+
+input,button{
+padding:8px;
+margin:5px 0;
+width:100%;
+}
+
+button{
+background:#000;
+color:#fff;
+border:none;
+cursor:pointer;
+}
 
 .flex{display:flex;gap:10px;}
 .small{width:50%;}
 
-.receipt{margin-top:20px;padding:15px;border:1px solid #000;}
+.receipt{
+margin-top:20px;
+padding:15px;
+border:1px solid #000;
+background:#fff;
+}
+
 .center{text-align:center;}
 
-.item-row{display:flex;gap:5px;margin-bottom:5px;}
+.item-row{
+display:flex;
+gap:5px;
+margin-bottom:5px;
+}
+
 .item-row input{flex:1;}
 .item-row button{width:60px;}
 
@@ -34,6 +78,17 @@ border:1px dashed #000;
 background:#fafafa;
 cursor:pointer;
 }
+
+/* ✅ QR LEFT FIX */
+.qr-box{
+text-align:left;
+margin-top:10px;
+}
+
+#qrcode{
+display:inline-block;
+}
+
 </style>
 </head>
 
@@ -43,7 +98,10 @@ cursor:pointer;
 
 <div class="header">
 <img id="logoPreview" src="logo.png">
-<div><h2>BD Medical Invoice System PRO</h2></div>
+<div>
+<h2>BD Medical Research and Consultancy</h2>
+<p>Professional Journal Invoice System</p>
+</div>
 </div>
 
 <input id="receiptNo" placeholder="Receipt No">
@@ -76,10 +134,16 @@ cursor:pointer;
 <button onclick="window.print()">Print</button>
 <button onclick="downloadPDF()">Download PDF</button>
 
-<!-- ✅ ONLY ONE QR + RECEIPT AREA -->
+<!-- RECEIPT -->
 <div class="receipt" id="receipt">
 
-<h2 class="center">JOURNAL INVOICE / MONEY RECEIPT</h2>
+<div class="center">
+<img id="receiptLogo" src="logo.png" style="width:80px;height:80px;object-fit:cover;">
+<h2>BD Medical Research and Consultancy</h2>
+<h3>JOURNAL INVOICE / MONEY RECEIPT</h3>
+</div>
+
+<hr>
 
 <p><b>Receipt No:</b> <span id="rNo"></span></p>
 <p><b>Date:</b> <span id="rDate"></span></p>
@@ -95,20 +159,20 @@ cursor:pointer;
 <p><b>Contract:</b> <span id="rContract"></span></p>
 <p><b>Paid:</b> <span id="rPaid"></span></p>
 <p><b>Due:</b> <span id="rDue"></span></p>
-
 <p><b>Payment:</b> <span id="rAmount"></span></p>
 <p><b>Words:</b> <span id="rWords"></span></p>
 
 <hr>
 
-<div class="center">
+<!-- ✅ QR LEFT SIDE -->
+<div class="qr-box">
 <h4>QR Code</h4>
 <div id="qrcode"></div>
 </div>
 
 <br>
-<p><b>Received By:</b> Rakib Joy</p>
 
+<p><b>Received By:</b> Rakib Joy</p>
 <img id="signPreview" style="width:120px;display:none;">
 
 </div>
@@ -125,12 +189,10 @@ addItem();
 updateClients();
 };
 
-// receipt no
 function getNextReceiptNo(){
 return "INV-" + (invoices.length + 1).toString().padStart(5,"0");
 }
 
-// articles
 function addItem(){
 let div=document.createElement("div");
 div.className="item-row";
@@ -146,40 +208,30 @@ return [...document.querySelectorAll("#items input")]
 .map(i=>i.value).filter(v=>v);
 }
 
-// logo
 function loadLogo(e){
-document.getElementById("logoPreview").src = URL.createObjectURL(e.target.files[0]);
+let url = URL.createObjectURL(e.target.files[0]);
+document.getElementById("logoPreview").src = url;
+document.getElementById("receiptLogo").src = url;
 }
 
-// sign
 function loadSign(e){
 let img=document.getElementById("signPreview");
 img.src=URL.createObjectURL(e.target.files[0]);
 img.style.display="block";
 }
 
-// save
 function saveInvoice(data){
 invoices.push(data);
 localStorage.setItem("invoices",JSON.stringify(invoices));
 }
 
-// history
 function showHistory(){
 let name=document.getElementById("name").value;
 let box=document.getElementById("historyBox");
-
 let data=invoices.filter(i=>i.name===name);
 
-if(!name){
-box.innerHTML="Enter client name";
-return;
-}
-
-if(data.length===0){
-box.innerHTML="No previous records";
-return;
-}
+if(!name){ box.innerHTML="Enter client name"; return; }
+if(data.length===0){ box.innerHTML="No previous records"; return; }
 
 box.innerHTML="<b>Click to load:</b><br>"+
 data.map(d=>
@@ -195,24 +247,20 @@ document.getElementById("contract").value=contract;
 calcDue();
 }
 
-// clients
 function updateClients(){
 let names=[...new Set(invoices.map(i=>i.name))];
 document.getElementById("clients").innerHTML=
 names.map(n=>`<option value="${n}">`).join("");
 }
 
-// due calc
 function calcDue(){
 let c=+document.getElementById("contract").value||0;
 let p=+document.getElementById("paid").value||0;
 document.getElementById("amount").value=p;
 }
 
-// QR FIXED FUNCTION
-function generateQR(no,name,paid,contract,due){
+function generateQR(no,name,paid,due){
 document.getElementById("qrcode").innerHTML="";
-
 new QRCode(document.getElementById("qrcode"),{
 text:`Invoice:${no} | ${name} | Paid:${paid} | Due:${due}`,
 width:120,
@@ -220,7 +268,6 @@ height:120
 });
 }
 
-// generate invoice
 function generateReceipt(){
 
 let name=document.getElementById("name").value;
@@ -232,7 +279,6 @@ let due=contract-paid;
 let items=getItems();
 let no=document.getElementById("receiptNo").value;
 
-// fill receipt
 document.getElementById("rNo").innerText=no;
 document.getElementById("rName").innerText=name;
 document.getElementById("rDate").innerText=document.getElementById("date").value;
@@ -243,7 +289,6 @@ document.getElementById("rAmount").innerText=paid;
 document.getElementById("rWords").innerText=document.getElementById("amountText").value;
 document.getElementById("rPurpose").innerText=document.getElementById("purpose").value;
 
-// items
 let ul=document.getElementById("rArticles");
 ul.innerHTML="";
 items.forEach(i=>{
@@ -252,25 +297,32 @@ li.innerText=i;
 ul.appendChild(li);
 });
 
-// QR CALL
-generateQR(no,name,paid,contract,due);
-
-// save
+generateQR(no,name,paid,due);
 saveInvoice({no,name,paid,contract,due});
 updateClients();
-
 document.getElementById("receiptNo").value=getNextReceiptNo();
 }
 
-// PDF
 function downloadPDF(){
+
 const { jsPDF } = window.jspdf;
 
-html2canvas(document.getElementById("receipt")).then(canvas=>{
-const pdf=new jsPDF("p","mm","a4");
-const img=canvas.toDataURL("image/png");
-pdf.addImage(img,"PNG",10,10,190,250);
-pdf.save("invoice.pdf");
+html2canvas(document.getElementById("receipt"),{scale:2}).then(canvas=>{
+
+let imgData = canvas.toDataURL("image/png");
+
+let pdf = new jsPDF("p","mm","a4");
+
+let pageWidth = 210;
+let margin = 10;
+
+let imgWidth = pageWidth - margin*2;
+let imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+pdf.addImage(imgData,"PNG",margin,margin,imgWidth,imgHeight);
+
+pdf.save("BD_Medical_Invoice.pdf");
+
 });
 }
 
