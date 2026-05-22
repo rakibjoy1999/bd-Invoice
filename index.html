@@ -2,65 +2,37 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>BD Medical Research and Consultancy - Money Receipt</title>
+<title>Advanced Invoice System Pro</title>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
-body{
-  font-family: "Times New Roman", serif;
-  background:#f2f2f2;
-  padding:20px;
-}
+body{font-family:Times New Roman;background:#f2f2f2;padding:20px;}
+.container{max-width:900px;margin:auto;background:#fff;padding:20px;border:2px solid #000;}
+.header{display:flex;gap:10px;align-items:center;border-bottom:2px solid #000;padding-bottom:10px;}
+.header img{width:80px;height:80px;object-fit:cover;}
 
-.container{
-  max-width:900px;
-  margin:auto;
-  background:white;
-  padding:20px;
-  border:2px solid #000;
-}
+input,button{padding:8px;margin:5px 0;width:100%;}
+button{background:#000;color:#fff;border:none;cursor:pointer;}
 
-h1{
-  text-align:center;
-  font-size:28px;
-}
+.flex{display:flex;gap:10px;}
+.small{width:50%;}
 
-.header{
-  text-align:center;
-  margin-bottom:10px;
-}
+.receipt{margin-top:20px;padding:15px;border:1px solid #000;}
+.center{text-align:center;}
 
-input{
-  width:100%;
-  padding:8px;
-  margin:5px 0;
-  border:1px solid #000;
-}
+.item-row{display:flex;gap:5px;margin-bottom:5px;}
+.item-row input{flex:1;}
+.item-row button{width:60px;}
 
-button{
-  padding:10px;
-  margin-top:10px;
-  background:black;
-  color:white;
-  border:none;
-  cursor:pointer;
-}
-
-.receipt{
-  margin-top:20px;
-  padding:20px;
-  border:1px solid #000;
-  background:#fff;
-}
-
-.small{
-  font-size:14px;
-}
-
-.center{
-  text-align:center;
+.history{
+margin-top:10px;
+padding:10px;
+border:1px dashed #000;
+background:#fafafa;
+cursor:pointer;
 }
 </style>
 </head>
@@ -70,73 +42,236 @@ button{
 <div class="container">
 
 <div class="header">
-  <h1>BD Medical Research and Consultancy</h1>
-  <p class="small">Money Receipt System</p>
+<img id="logoPreview" src="logo.png">
+<div><h2>BD Medical Invoice System PRO</h2></div>
 </div>
 
-<!-- INPUT FORM -->
-<input id="receiptNo" placeholder="Receipt No (e.g. 001)">
-<input id="name" placeholder="Receiver Name">
-<input id="amount" placeholder="Amount (TK)">
+<input id="receiptNo" placeholder="Receipt No">
+<input list="clients" id="name" placeholder="Client Name" oninput="showHistory()">
+<datalist id="clients"></datalist>
+
+<div id="historyBox" class="history"></div>
+
+<div class="flex">
+<input class="small" id="contract" placeholder="Contract Amount" oninput="calcDue()">
+<input class="small" id="paid" placeholder="Paid Amount" oninput="calcDue()">
+</div>
+
+<input id="amount" placeholder="Payment Amount">
 <input id="amountText" placeholder="Amount in Words">
 <input id="purpose" placeholder="Purpose">
-<input id="date" type="date">
+<input type="date" id="date">
 
-<button onclick="generateReceipt()">Generate Receipt</button>
+<h4>Article Titles</h4>
+<div id="items"></div>
+<button onclick="addItem()">+ Add Article</button>
+
+<p>Logo:</p>
+<input type="file" onchange="loadLogo(event)">
+
+<p>Signature:</p>
+<input type="file" onchange="loadSign(event)">
+
+<button onclick="generateReceipt()">Generate Invoice</button>
+<button onclick="window.print()">Print</button>
 <button onclick="downloadPDF()">Download PDF</button>
 
-<!-- RECEIPT -->
+<!-- ✅ ONLY ONE QR + RECEIPT AREA -->
 <div class="receipt" id="receipt">
 
-  <h2 class="center">MONEY RECEIPT</h2>
+<h2 class="center">JOURNAL INVOICE / MONEY RECEIPT</h2>
 
-  <p><b>Receipt No:</b> <span id="rNo"></span></p>
-  <p><b>Date:</b> <span id="rDate"></span></p>
+<p><b>Receipt No:</b> <span id="rNo"></span></p>
+<p><b>Date:</b> <span id="rDate"></span></p>
 
-  <hr>
+<hr>
 
-  <p><b>Received From:</b> <span id="rName"></span></p>
-  <p><b>Amount:</b> <span id="rAmount"></span> TK</p>
-  <p><b>In Words:</b> <span id="rWords"></span></p>
-  <p><b>Purpose:</b> <span id="rPurpose"></span></p>
+<p><b>Client:</b> <span id="rName"></span></p>
+<p><b>Purpose:</b> <span id="rPurpose"></span></p>
 
-  <br><br>
+<p><b>Articles:</b></p>
+<ul id="rArticles"></ul>
 
-  <p class="center"><b>BD Medical Research and Consultancy</b></p>
+<p><b>Contract:</b> <span id="rContract"></span></p>
+<p><b>Paid:</b> <span id="rPaid"></span></p>
+<p><b>Due:</b> <span id="rDue"></span></p>
+
+<p><b>Payment:</b> <span id="rAmount"></span></p>
+<p><b>Words:</b> <span id="rWords"></span></p>
+
+<hr>
+
+<div class="center">
+<h4>QR Code</h4>
+<div id="qrcode"></div>
+</div>
+
+<br>
+<p><b>Received By:</b> Rakib Joy</p>
+
+<img id="signPreview" style="width:120px;display:none;">
+
 </div>
 
 </div>
 
 <script>
 
-function generateReceipt(){
-  document.getElementById("rNo").innerText = document.getElementById("receiptNo").value;
-  document.getElementById("rName").innerText = document.getElementById("name").value;
-  document.getElementById("rAmount").innerText = document.getElementById("amount").value;
-  document.getElementById("rWords").innerText = document.getElementById("amountText").value;
-  document.getElementById("rPurpose").innerText = document.getElementById("purpose").value;
-  document.getElementById("rDate").innerText = document.getElementById("date").value;
+let invoices = JSON.parse(localStorage.getItem("invoices")||"[]");
+
+window.onload = ()=>{
+document.getElementById("receiptNo").value = getNextReceiptNo();
+addItem();
+updateClients();
+};
+
+// receipt no
+function getNextReceiptNo(){
+return "INV-" + (invoices.length + 1).toString().padStart(5,"0");
 }
 
+// articles
+function addItem(){
+let div=document.createElement("div");
+div.className="item-row";
+div.innerHTML=`
+<input placeholder="Article Title">
+<button onclick="this.parentElement.remove()">X</button>
+`;
+document.getElementById("items").appendChild(div);
+}
+
+function getItems(){
+return [...document.querySelectorAll("#items input")]
+.map(i=>i.value).filter(v=>v);
+}
+
+// logo
+function loadLogo(e){
+document.getElementById("logoPreview").src = URL.createObjectURL(e.target.files[0]);
+}
+
+// sign
+function loadSign(e){
+let img=document.getElementById("signPreview");
+img.src=URL.createObjectURL(e.target.files[0]);
+img.style.display="block";
+}
+
+// save
+function saveInvoice(data){
+invoices.push(data);
+localStorage.setItem("invoices",JSON.stringify(invoices));
+}
+
+// history
+function showHistory(){
+let name=document.getElementById("name").value;
+let box=document.getElementById("historyBox");
+
+let data=invoices.filter(i=>i.name===name);
+
+if(!name){
+box.innerHTML="Enter client name";
+return;
+}
+
+if(data.length===0){
+box.innerHTML="No previous records";
+return;
+}
+
+box.innerHTML="<b>Click to load:</b><br>"+
+data.map(d=>
+`<div onclick="fillClient('${d.name}',${d.paid},${d.contract})">
+Receipt ${d.no} | Paid ${d.paid}
+</div>`).join("");
+}
+
+function fillClient(name,paid,contract){
+document.getElementById("name").value=name;
+document.getElementById("paid").value=paid;
+document.getElementById("contract").value=contract;
+calcDue();
+}
+
+// clients
+function updateClients(){
+let names=[...new Set(invoices.map(i=>i.name))];
+document.getElementById("clients").innerHTML=
+names.map(n=>`<option value="${n}">`).join("");
+}
+
+// due calc
+function calcDue(){
+let c=+document.getElementById("contract").value||0;
+let p=+document.getElementById("paid").value||0;
+document.getElementById("amount").value=p;
+}
+
+// QR FIXED FUNCTION
+function generateQR(no,name,paid,contract,due){
+document.getElementById("qrcode").innerHTML="";
+
+new QRCode(document.getElementById("qrcode"),{
+text:`Invoice:${no} | ${name} | Paid:${paid} | Due:${due}`,
+width:120,
+height:120
+});
+}
+
+// generate invoice
+function generateReceipt(){
+
+let name=document.getElementById("name").value;
+if(!name) return alert("Client required");
+
+let contract=+document.getElementById("contract").value||0;
+let paid=+document.getElementById("paid").value||0;
+let due=contract-paid;
+let items=getItems();
+let no=document.getElementById("receiptNo").value;
+
+// fill receipt
+document.getElementById("rNo").innerText=no;
+document.getElementById("rName").innerText=name;
+document.getElementById("rDate").innerText=document.getElementById("date").value;
+document.getElementById("rContract").innerText=contract;
+document.getElementById("rPaid").innerText=paid;
+document.getElementById("rDue").innerText=due;
+document.getElementById("rAmount").innerText=paid;
+document.getElementById("rWords").innerText=document.getElementById("amountText").value;
+document.getElementById("rPurpose").innerText=document.getElementById("purpose").value;
+
+// items
+let ul=document.getElementById("rArticles");
+ul.innerHTML="";
+items.forEach(i=>{
+let li=document.createElement("li");
+li.innerText=i;
+ul.appendChild(li);
+});
+
+// QR CALL
+generateQR(no,name,paid,contract,due);
+
+// save
+saveInvoice({no,name,paid,contract,due});
+updateClients();
+
+document.getElementById("receiptNo").value=getNextReceiptNo();
+}
+
+// PDF
 function downloadPDF(){
+const { jsPDF } = window.jspdf;
 
-  const receipt = document.getElementById("receipt");
-
-  html2canvas(receipt, {scale:2}).then(canvas => {
-
-    const imgData = canvas.toDataURL("image/png");
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p","mm","a4");
-
-    const imgWidth = 190;
-    const pageHeight = 295;
-    const imgHeight = canvas.height * imgWidth / canvas.width;
-
-    pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-    pdf.save("BD_Medical_Receipt.pdf");
-
-  });
-
+html2canvas(document.getElementById("receipt")).then(canvas=>{
+const pdf=new jsPDF("p","mm","a4");
+const img=canvas.toDataURL("image/png");
+pdf.addImage(img,"PNG",10,10,190,250);
+pdf.save("invoice.pdf");
+});
 }
 
 </script>
