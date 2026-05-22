@@ -31,9 +31,10 @@ border-bottom:2px solid #000;
 padding-bottom:10px;
 }
 
+/* 🔥 BIG LOGO FIX */
 .header img{
-width:80px;
-height:80px;
+width:120px;
+height:120px;
 object-fit:cover;
 }
 
@@ -62,6 +63,13 @@ background:#fff;
 
 .center{text-align:center;}
 
+/* 🔥 RECEIPT LOGO BIG */
+#receiptLogo{
+width:120px;
+height:120px;
+object-fit:cover;
+}
+
 .item-row{
 display:flex;
 gap:5px;
@@ -79,7 +87,7 @@ background:#fafafa;
 cursor:pointer;
 }
 
-/* ✅ QR LEFT FIX */
+/* QR LEFT */
 .qr-box{
 text-align:left;
 margin-top:10px;
@@ -88,7 +96,6 @@ margin-top:10px;
 #qrcode{
 display:inline-block;
 }
-
 </style>
 </head>
 
@@ -138,7 +145,7 @@ display:inline-block;
 <div class="receipt" id="receipt">
 
 <div class="center">
-<img id="receiptLogo" src="logo.png" style="width:80px;height:80px;object-fit:cover;">
+<img id="receiptLogo" src="logo.png">
 <h2>BD Medical Research and Consultancy</h2>
 <h3>JOURNAL INVOICE / MONEY RECEIPT</h3>
 </div>
@@ -164,7 +171,6 @@ display:inline-block;
 
 <hr>
 
-<!-- ✅ QR LEFT SIDE -->
 <div class="qr-box">
 <h4>QR Code</h4>
 <div id="qrcode"></div>
@@ -307,7 +313,9 @@ function downloadPDF(){
 
 const { jsPDF } = window.jspdf;
 
-html2canvas(document.getElementById("receipt"),{scale:2}).then(canvas=>{
+html2canvas(document.getElementById("receipt"),{
+scale:3
+}).then(canvas=>{
 
 let imgData = canvas.toDataURL("image/png");
 
