@@ -31,7 +31,6 @@ border-bottom:2px solid #000;
 padding-bottom:10px;
 }
 
-/* 🔥 BIG LOGO FIX */
 .header img{
 width:120px;
 height:120px;
@@ -63,7 +62,6 @@ background:#fff;
 
 .center{text-align:center;}
 
-/* 🔥 RECEIPT LOGO BIG */
 #receiptLogo{
 width:120px;
 height:120px;
@@ -87,7 +85,6 @@ background:#fafafa;
 cursor:pointer;
 }
 
-/* QR LEFT */
 .qr-box{
 text-align:left;
 margin-top:10px;
@@ -95,6 +92,17 @@ margin-top:10px;
 
 #qrcode{
 display:inline-block;
+}
+
+.section{
+border-top:1px solid #000;
+margin-top:10px;
+padding-top:10px;
+}
+
+.small-text{
+font-size:13px;
+line-height:1.5;
 }
 </style>
 </head>
@@ -169,6 +177,27 @@ display:inline-block;
 <p><b>Payment:</b> <span id="rAmount"></span></p>
 <p><b>Words:</b> <span id="rWords"></span></p>
 
+<!-- PAYMENT INFO -->
+<div class="section small-text">
+<h3>Payment Information</h3>
+<p><b>bKash:</b> +8801302519517</p>
+<p><b>Nagad:</b> +8801302519517</p>
+<p><b>Bank:</b> Islami Bank Bangladesh PLC</p>
+<p>Green Road Sub-Branch, Elephant Road</p>
+<p><b>A/C Name:</b> Md. Rakibul Hasan</p>
+<p><b>A/C No:</b> 20507840200144704</p>
+
+<p><b>Notes:</b> Thank you for choosing BD Medical Research & Consultancy. Please mention the Invoice Number while making payment and send transaction details for verification.</p>
+</div>
+
+<!-- TERMS -->
+<div class="section small-text">
+<h3>Terms & Conditions</h3>
+<p>• Advance payment is non-refundable.</p>
+<p>• Remaining due must be paid before final delivery.</p>
+<p>• Publication timeline depends on journal policy.</p>
+</div>
+
 <hr>
 
 <div class="qr-box">
@@ -186,7 +215,6 @@ display:inline-block;
 </div>
 
 <script>
-
 let invoices = JSON.parse(localStorage.getItem("invoices")||"[]");
 
 window.onload = ()=>{
@@ -231,34 +259,6 @@ invoices.push(data);
 localStorage.setItem("invoices",JSON.stringify(invoices));
 }
 
-function showHistory(){
-let name=document.getElementById("name").value;
-let box=document.getElementById("historyBox");
-let data=invoices.filter(i=>i.name===name);
-
-if(!name){ box.innerHTML="Enter client name"; return; }
-if(data.length===0){ box.innerHTML="No previous records"; return; }
-
-box.innerHTML="<b>Click to load:</b><br>"+
-data.map(d=>
-`<div onclick="fillClient('${d.name}',${d.paid},${d.contract})">
-Receipt ${d.no} | Paid ${d.paid}
-</div>`).join("");
-}
-
-function fillClient(name,paid,contract){
-document.getElementById("name").value=name;
-document.getElementById("paid").value=paid;
-document.getElementById("contract").value=contract;
-calcDue();
-}
-
-function updateClients(){
-let names=[...new Set(invoices.map(i=>i.name))];
-document.getElementById("clients").innerHTML=
-names.map(n=>`<option value="${n}">`).join("");
-}
-
 function calcDue(){
 let c=+document.getElementById("contract").value||0;
 let p=+document.getElementById("paid").value||0;
@@ -275,7 +275,6 @@ height:120
 }
 
 function generateReceipt(){
-
 let name=document.getElementById("name").value;
 if(!name) return alert("Client required");
 
@@ -305,20 +304,14 @@ ul.appendChild(li);
 
 generateQR(no,name,paid,due);
 saveInvoice({no,name,paid,contract,due});
-updateClients();
 document.getElementById("receiptNo").value=getNextReceiptNo();
 }
 
 function downloadPDF(){
-
 const { jsPDF } = window.jspdf;
 
-html2canvas(document.getElementById("receipt"),{
-scale:3
-}).then(canvas=>{
-
+html2canvas(document.getElementById("receipt"),{scale:3}).then(canvas=>{
 let imgData = canvas.toDataURL("image/png");
-
 let pdf = new jsPDF("p","mm","a4");
 
 let pageWidth = 210;
@@ -328,9 +321,13 @@ let imgWidth = pageWidth - margin*2;
 let imgHeight = (canvas.height * imgWidth) / canvas.width;
 
 pdf.addImage(imgData,"PNG",margin,margin,imgWidth,imgHeight);
-
 pdf.save("BD_Medical_Invoice.pdf");
+});
+}
+</script>
 
+</body>
+</html>
 });
 }
 
